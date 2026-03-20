@@ -648,6 +648,7 @@ document.querySelectorAll('.how-to-tab').forEach(tab => {
 
 (function loadFromURL() {
   const p = new URLSearchParams(location.search);
+  if (p.get('g')) return; // group URL handled by loadGroupFromURL
   const c = p.get('c');
   const e = p.get('e');
   const a = p.get('a');
@@ -672,4 +673,119 @@ document.querySelectorAll('.how-to-tab').forEach(tab => {
     `linear-gradient(160deg, ${col.highlight}55 0%, ${col.body}33 50%, ${col.shadow}22 100%)`;
 
   showScreen('screen-shared');
+})();
+
+// ── Group Picture ──────────────────────────────────────────
+
+let groupMembers = [];
+
+const groupStage    = document.getElementById('group-stage');
+const groupUrlInput = document.getElementById('group-url-input');
+const groupAddBtn   = document.getElementById('group-add-btn');
+const groupLinkBtn  = document.getElementById('group-link-btn');
+const groupBackBtn  = document.getElementById('group-back-btn');
+const groupError    = document.getElementById('group-error');
+const groupPicBtn   = document.getElementById('group-pic-btn');
+
+function renderGroupStage(animateLastIdx = -1) {
+  if (groupMembers.length === 0) {
+    groupStage.innerHTML = '<p class="group-empty">Your character will appear here</p>';
+    return;
+  }
+  groupStage.innerHTML = groupMembers.map(({ colorIndex, expressionIndex, accessoryIndex, shapeIndex }, i) => {
+    const c   = COLORS[colorIndex];
+    const svg = generateCharacterSVG(colorIndex, expressionIndex, accessoryIndex, shapeIndex);
+    const isNew = i === animateLastIdx ? ' new-member' : '';
+    return `<div class="group-member bobbing${isNew}">
+      ${svg}
+      <span class="group-member-name">${c.name}</span>
+    </div>`;
+  }).join('');
+}
+
+// Open group screen from result screen
+groupPicBtn.addEventListener('click', () => {
+  const { colorIndex, expressionIndex, accessoryIndex, shapeIndex } =
+    getCharacter(answers, freeformInput.value);
+  groupMembers = [{ colorIndex, expressionIndex, accessoryIndex, shapeIndex }];
+  renderGroupStage(0);
+  document.getElementById('group-subtitle').textContent = 'Paste a friend\'s link to add them';
+  showScreen('screen-group');
+});
+
+// Add a friend by pasting their share link
+groupAddBtn.addEventListener('click', addFromInput);
+groupUrlInput.addEventListener('keydown', e => { if (e.key === 'Enter') addFromInput(); });
+
+function addFromInput() {
+  const raw = groupUrlInput.value.trim();
+  if (!raw) return;
+  groupError.hidden = true;
+  try {
+    // Accept full URLs or just query strings
+    const search = raw.startsWith('http') ? new URL(raw).search : raw;
+    const p = new URLSearchParams(search);
+    const c = p.get('c'), e = p.get('e'), a = p.get('a'), s = p.get('s');
+    if (c === null || e === null) throw new Error('missing params');
+    groupMembers.push({
+      colorIndex:      parseInt(c) % 20,
+      expressionIndex: parseInt(e) % 5,
+      accessoryIndex:  parseInt(a || '0') % 5,
+      shapeIndex:      parseInt(s || '0') % 5,
+    });
+    groupUrlInput.value = '';
+    renderGroupStage(groupMembers.length - 1);
+  } catch {
+    groupError.hidden = false;
+    setTimeout(() => { groupError.hidden = true; }, 2500);
+  }
+}
+
+// Copy group link
+groupLinkBtn.addEventListener('click', () => {
+  // Format: ?g=c,e,a,s-c,e,a,s-...
+  const encoded = groupMembers
+    .map(m => `${m.colorIndex},${m.expressionIndex},${m.accessoryIndex},${m.shapeIndex}`)
+    .join('-');
+  const url = `${location.origin}${location.pathname}?g=${encoded}`;
+  navigator.clipboard.writeText(url).then(() => {
+    groupLinkBtn.textContent = 'Copied!';
+    setTimeout(() => { groupLinkBtn.textContent = 'Copy group link'; }, 1800);
+  });
+});
+
+groupBackBtn.addEventListener('click', () => {
+  showScreen('screen-result');
+});
+
+// ── Load group from URL ?g=... ────────────────────────────
+
+(function loadGroupFromURL() {
+  const p = new URLSearchParams(location.search);
+  const g = p.get('g');
+  if (!g) return;
+
+  try {
+    const members = g.split('-').map(token => {
+      const parts = token.split(',').map(Number);
+      return {
+        colorIndex:      (parts[0] || 0) % 20,
+        expressionIndex: (parts[1] || 0) % 5,
+        accessoryIndex:  (parts[2] || 0) % 5,
+        shapeIndex:      (parts[3] || 0) % 5,
+      };
+    });
+    if (members.length === 0) return;
+    groupMembers = members;
+    renderGroupStage();
+
+    // Read-only view: hide input row, back btn; update copy to join CTA
+    document.getElementById('group-add-row').hidden = true;
+    groupBackBtn.hidden = true;
+    groupLinkBtn.textContent = 'Copy group link';
+    document.getElementById('group-subtitle').textContent =
+      `${members.length} AI ${members.length === 1 ? 'self' : 'selves'} in this crew`;
+
+    showScreen('screen-group');
+  } catch { /* malformed URL, ignore */ }
 })();

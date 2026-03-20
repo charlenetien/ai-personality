@@ -106,6 +106,7 @@
 
       <div class="result-actions">
         <button class="btn-ghost" id="share-btn">Share my character ↗</button>
+        <button class="btn-ghost" id="group-pic-btn">Group pic 👥</button>
         <button class="btn-ghost" id="retake-btn">Retake</button>
       </div>
 
@@ -150,6 +151,30 @@
         <button class="btn-primary postcard-copy-btn" id="postcard-copy-btn">Copy link</button>
         <button class="btn-ghost postcard-close-btn" id="postcard-close-btn">Close</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ── Group Picture ───────────────────────────────────────── -->
+  <div id="screen-group" class="screen">
+    <div class="group-header">
+      <p class="group-eyebrow">✦ our AI selves</p>
+      <h2 class="group-title" id="group-title">The squad</h2>
+      <p class="group-subtitle" id="group-subtitle">Add your crew below</p>
+    </div>
+
+    <div class="group-stage" id="group-stage">
+      <p class="group-empty">Your character will appear here</p>
+    </div>
+
+    <div class="group-add-row" id="group-add-row">
+      <input type="url" id="group-url-input" class="group-input" placeholder="Paste a friend's share link…" autocomplete="off">
+      <button class="btn-primary" id="group-add-btn">Add</button>
+    </div>
+    <p class="group-error" id="group-error" hidden>That doesn't look like a valid share link.</p>
+
+    <div class="group-actions">
+      <button class="btn-primary" id="group-link-btn">Copy group link</button>
+      <button class="btn-ghost" id="group-back-btn">← Back</button>
     </div>
   </div>
 

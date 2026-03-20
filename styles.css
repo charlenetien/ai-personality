@@ -879,3 +879,183 @@ kbd {
     flex-direction: column;
   }
 }
+
+/* ── Group Picture ─────────────────────────────────────────── */
+
+#screen-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow-y: auto;
+  padding-bottom: 32px;
+}
+
+.group-header {
+  text-align: center;
+  padding: 40px 24px 24px;
+}
+
+.group-eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.group-title {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.group-subtitle {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.group-stage {
+  margin: 0 20px;
+  background: linear-gradient(180deg, #ede9fe 0%, #f5f3ff 60%, #fff 100%);
+  border-radius: 28px;
+  border: 1.5px solid rgba(139,92,246,0.12);
+  padding: 36px 20px 24px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 230px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle ground rule */
+.group-stage::after {
+  content: '';
+  position: absolute;
+  bottom: 52px;
+  left: 24px;
+  right: 24px;
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, rgba(139,92,246,0.18), transparent);
+}
+
+/* Decorative sparkles in stage corners */
+.group-stage::before {
+  content: '✦  ✦  ✦';
+  position: absolute;
+  top: 12px;
+  left: 0; right: 0;
+  text-align: center;
+  font-size: 0.6rem;
+  letter-spacing: 0.5em;
+  color: rgba(139,92,246,0.2);
+  pointer-events: none;
+}
+
+.group-empty {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  opacity: 0.5;
+  margin: auto;
+}
+
+.group-member {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  transition: transform 0.3s ease;
+}
+
+.group-member svg {
+  animation: bob 2.2s cubic-bezier(0.4,0,0.2,1) infinite;
+  width: 86px;
+  height: 86px;
+  display: block;
+}
+
+/* Stagger delays so they don't all bounce in sync */
+.group-member:nth-child(2) svg  { animation-delay: -0.55s; }
+.group-member:nth-child(3) svg  { animation-delay: -1.10s; }
+.group-member:nth-child(4) svg  { animation-delay: -0.30s; }
+.group-member:nth-child(5) svg  { animation-delay: -1.50s; }
+.group-member:nth-child(6) svg  { animation-delay: -0.80s; }
+.group-member:nth-child(7) svg  { animation-delay: -1.80s; }
+.group-member:nth-child(8) svg  { animation-delay: -0.45s; }
+
+/* Stagger heights for team-photo feel */
+.group-member:nth-child(even)   { transform: translateY(-16px); }
+.group-member:nth-child(3n)     { transform: translateY(-6px); }
+.group-member:nth-child(3n+1)   { transform: translateY(-22px); }
+
+/* Size variation based on position */
+.group-member:nth-child(1) svg  { width: 92px; height: 92px; }
+.group-member:nth-child(3) svg  { width: 100px; height: 100px; }
+.group-member:nth-child(5) svg  { width: 78px; height: 78px; }
+.group-member:nth-child(7) svg  { width: 74px; height: 74px; }
+
+.group-member-name {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  max-width: 78px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+
+/* Pop-in animation when a character is added */
+@keyframes member-pop {
+  from { transform: translateY(20px) scale(0.5); opacity: 0; }
+  60%  { transform: translateY(-8px) scale(1.08); opacity: 1; }
+  to   { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.group-member.new-member {
+  animation: member-pop 0.5s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+}
+
+.group-add-row {
+  display: flex;
+  gap: 8px;
+  padding: 18px 20px 0;
+}
+
+.group-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.875rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.group-input:focus {
+  border-color: var(--accent);
+}
+
+.group-error {
+  font-size: 0.78rem;
+  color: #ef4444;
+  padding: 6px 20px 0;
+}
+
+.group-actions {
+  display: flex;
+  gap: 10px;
+  padding: 14px 20px 0;
+}
+
+.group-actions .btn-primary {
+  flex: 1;
+}
