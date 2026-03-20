@@ -792,57 +792,61 @@ groupBackBtn.addEventListener('click', () => {
 
 // ── Organic blob animation engine ─────────────────────────
 // Replaces CSS @keyframes with continuous sine-wave physics.
-// Each blob gets unique phase + frequency → never syncs, always seamless.
+// Each blob gets unique params → all move differently, never sync.
 
 const blobPhysics = new WeakMap();
 
 function getBlobPhysics(el) {
   if (!blobPhysics.has(el)) {
     blobPhysics.set(el, {
-      phase:  Math.random() * Math.PI * 2,          // random start point in cycle
-      freq:   0.55 + Math.random() * 0.35,          // 0.55–0.90 Hz  (slow, heavy)
-      ampY:   14  + Math.random() * 10,             // 14–24px travel
-      wobble: 0.013 + Math.random() * 0.012,        // secondary squeeze intensity
-      tilt:   1.2  + Math.random() * 1.4,           // max rotation degrees
+      phase:    Math.random() * Math.PI * 2,         // random start point
+      phase2:   Math.random() * Math.PI * 2,         // independent phase for sway & wobble
+      freq:     0.30 + Math.random() * 0.22,         // 0.30–0.52 Hz — slower, heavier
+      ampY:     12   + Math.random() * 14,           // 12–26px vertical travel
+      ampX:     Math.random() * 7,                   // 0–7px horizontal sway (varies a lot)
+      squash:   0.05 + Math.random() * 0.12,         // 0.05–0.17 squash intensity
+      wobble:   0.006 + Math.random() * 0.020,       // 0.006–0.026 squishy wobble
+      tilt:     0.6  + Math.random() * 2.8,          // 0.6–3.4° tilt range
     });
   }
   return blobPhysics.get(el);
 }
 
 (function startBlobEngine() {
-  // Selectors for every element we want to animate
   const SELECTORS = [
     '.welcome-blob svg',
     '.bobbing svg',
-    '.postcard-character',        // the whole div bounces
+    '.postcard-character',
     '.group-member svg',
   ];
 
   function tick(ts) {
-    const t = ts * 0.001; // ms → seconds
+    const t = ts * 0.001;
 
     SELECTORS.forEach(sel => {
       document.querySelectorAll(sel).forEach(el => {
-        const { phase, freq, ampY, wobble, tilt } = getBlobPhysics(el);
+        const { phase, phase2, freq, ampY, ampX, squash, wobble, tilt } = getBlobPhysics(el);
         const ω = freq * Math.PI * 2;
 
-        // Primary bounce — sine drives vertical position
-        const pos    = Math.sin(ω * t + phase);       // –1 = top, +1 = bottom
-        const y      = -pos * ampY;
+        // Primary vertical bounce
+        const posY = Math.sin(ω * t + phase);         // –1 top, +1 bottom
+        const y    = -posY * ampY;
 
-        // Squash/stretch derived from position (not velocity) — smooth & physical
-        // At top (pos=–1): taller + narrower.  At bottom (pos=+1): wider + shorter.
-        const scaleY = 1 - pos * 0.11;
-        const scaleX = 1 + pos * 0.09;
+        // Horizontal sway at incommensurable frequency (never repeats path)
+        const x    = Math.sin(ω * 0.37 * t + phase2) * ampX;
 
-        // Secondary fast wobble — simulates squishy material memory
-        const squeeze = Math.sin(ω * 2.3 * t + phase * 1.7) * wobble;
+        // Squash/stretch from position — each blob has its own intensity
+        const scaleY = 1 - posY * squash;
+        const scaleX = 1 + posY * (squash * 0.8);
 
-        // Gentle tilt follows the arc
+        // Squishy secondary wobble — material memory
+        const squeeze = Math.sin(ω * 2.3 * t + phase2 * 1.7) * wobble;
+
+        // Tilt follows arc — wider range per-blob
         const rot = Math.sin(ω * 0.8 * t + phase + 0.5) * tilt;
 
         el.style.transform =
-          `translateY(${y.toFixed(2)}px)` +
+          `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px)` +
           ` scaleX(${(scaleX + squeeze).toFixed(4)})` +
           ` scaleY(${(scaleY - squeeze).toFixed(4)})` +
           ` rotate(${rot.toFixed(2)}deg)`;
