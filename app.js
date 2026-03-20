@@ -303,15 +303,62 @@ function buildClaudeMD(answers, freeformText) {
   return md;
 }
 
+// ── Analyze freeform text → character signals ─────────────
+
+function analyzeText(text) {
+  if (!text || !text.trim()) return { warmth: 0, energy: 0, style: 3, wordBias: 0, hash: 0 };
+  const t = text.toLowerCase();
+  const words = t.split(/\s+/).filter(Boolean);
+
+  // Warmth: sunny/social/expressive language → warmer palette
+  const warmth = ['warm', 'cozy', 'love', 'bright', 'happy', 'friendly', 'joy',
+    'sunshine', 'orange', 'red', 'yellow', 'delight', 'fun', 'playful']
+    .filter(w => t.includes(w)).length;
+
+  // Energy: urgency/momentum → more expressive face
+  const energy = ['fast', 'quick', 'ship', 'build', 'launch', 'excited', 'bold',
+    'go', 'driven', 'always', 'hustle', 'deadline', '!']
+    .filter(w => t.includes(w)).length;
+
+  // Style: creative → beret; analytical → glasses (scale 0–6, 3 = neutral)
+  const creative   = ['creative', 'design', 'art', 'visual', 'aesthetic',
+    'craft', 'imagine', 'draw', 'color', 'style', 'make']
+    .filter(w => t.includes(w)).length;
+  const analytical = ['data', 'analyze', 'research', 'precise', 'detail',
+    'systematic', 'logic', 'reason', 'study', 'document', 'process']
+    .filter(w => t.includes(w)).length;
+  const style = Math.min(Math.max(creative - analytical + 3, 0), 6);
+
+  // Simple deterministic hash for leftover variation
+  let hash = 7;
+  for (let i = 0; i < Math.min(text.length, 80); i++)
+    hash = (hash * 31 + text.charCodeAt(i)) & 0xffff;
+
+  return {
+    warmth:   Math.min(warmth, 4),          // 0–4
+    energy:   Math.min(energy, 4),          // 0–4
+    style,                                   // 0–6
+    wordBias: Math.min(words.length, 12),   // 0–12
+    hash:     hash % 20,                    // 0–19
+  };
+}
+
 // ── Character from answers ────────────────────────────────
 
-function getCharacter(answers) {
+function getCharacter(answers, freeformText = '') {
   const [a0, a1, a2, a3, a4] = answers;
-  // All 5 answers feed every dimension with different weights → much better spread
-  const colorIndex      = (a0 * 5 + a1 * 3 + a2 * 7 + a3 * 11 + a4 * 2) % 20;
-  const expressionIndex = (a0 * 3 + a1 * 7 + a2 * 2 + a3 * 5  + a4 * 11) % 5;
-  const accessoryIndex  = (a0 * 7 + a1 * 2 + a2 * 11 + a3 * 3 + a4 * 5) % 5;
-  const shapeIndex      = (a0 * 2 + a1 * 11 + a2 * 5 + a3 * 7  + a4 * 3) % 5;
+  const txt = analyzeText(freeformText);
+
+  // Quiz answers are the base; freeform text nudges each dimension semantically:
+  //   warmth → color (warm vs cool palette)
+  //   energy → expression (calm vs excited)
+  //   style  → accessory (creative=beret, analytical=glasses)
+  //   words  → body shape
+  //   hash   → unique fingerprint so different text = different character
+  const colorIndex      = (a0 * 5 + a1 * 3 + a2 * 7 + a3 * 11 + a4 * 2 + txt.warmth * 4 + txt.hash) % 20;
+  const expressionIndex = (a0 * 3 + a1 * 7 + a2 * 2 + a3 * 5  + a4 * 11 + txt.energy * 2) % 5;
+  const accessoryIndex  = (a0 * 7 + a1 * 2 + a2 * 11 + a3 * 3 + a4 * 5  + txt.style * 3) % 5;
+  const shapeIndex      = (a0 * 2 + a1 * 11 + a2 * 5 + a3 * 7  + a4 * 3  + txt.wordBias * 2) % 5;
   return { colorIndex, expressionIndex, accessoryIndex, shapeIndex };
 }
 
@@ -474,7 +521,7 @@ function burstSparkles(container, color) {
 // ── Show result ───────────────────────────────────────────
 
 function showResult() {
-  const { colorIndex, expressionIndex, accessoryIndex, shapeIndex } = getCharacter(answers);
+  const { colorIndex, expressionIndex, accessoryIndex, shapeIndex } = getCharacter(answers, freeformInput.value);
   const c = COLORS[colorIndex];
   const freeformText = freeformInput.value.trim();
 
@@ -531,7 +578,7 @@ const postcardCopyBtn  = document.getElementById('postcard-copy-btn');
 const postcardCloseBtn = document.getElementById('postcard-close-btn');
 
 shareBtn.addEventListener('click', () => {
-  const { colorIndex, expressionIndex, accessoryIndex, shapeIndex } = getCharacter(answers);
+  const { colorIndex, expressionIndex, accessoryIndex, shapeIndex } = getCharacter(answers, freeformInput.value);
   const c = COLORS[colorIndex];
 
   // Populate postcard
@@ -559,7 +606,7 @@ document.addEventListener('keydown', (e) => {
 });
 
 postcardCopyBtn.addEventListener('click', () => {
-  const { colorIndex, expressionIndex, accessoryIndex, shapeIndex } = getCharacter(answers);
+  const { colorIndex, expressionIndex, accessoryIndex, shapeIndex } = getCharacter(answers, freeformInput.value);
   const params = new URLSearchParams({ c: colorIndex, e: expressionIndex, a: accessoryIndex, s: shapeIndex });
   const url = `${location.origin}${location.pathname}?${params}`;
   navigator.clipboard.writeText(url).then(() => {
