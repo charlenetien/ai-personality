@@ -789,3 +789,68 @@ groupBackBtn.addEventListener('click', () => {
     showScreen('screen-group');
   } catch { /* malformed URL, ignore */ }
 })();
+
+// ── Organic blob animation engine ─────────────────────────
+// Replaces CSS @keyframes with continuous sine-wave physics.
+// Each blob gets unique phase + frequency → never syncs, always seamless.
+
+const blobPhysics = new WeakMap();
+
+function getBlobPhysics(el) {
+  if (!blobPhysics.has(el)) {
+    blobPhysics.set(el, {
+      phase:  Math.random() * Math.PI * 2,          // random start point in cycle
+      freq:   0.55 + Math.random() * 0.35,          // 0.55–0.90 Hz  (slow, heavy)
+      ampY:   14  + Math.random() * 10,             // 14–24px travel
+      wobble: 0.013 + Math.random() * 0.012,        // secondary squeeze intensity
+      tilt:   1.2  + Math.random() * 1.4,           // max rotation degrees
+    });
+  }
+  return blobPhysics.get(el);
+}
+
+(function startBlobEngine() {
+  // Selectors for every element we want to animate
+  const SELECTORS = [
+    '.welcome-blob svg',
+    '.bobbing svg',
+    '.postcard-character',        // the whole div bounces
+    '.group-member svg',
+  ];
+
+  function tick(ts) {
+    const t = ts * 0.001; // ms → seconds
+
+    SELECTORS.forEach(sel => {
+      document.querySelectorAll(sel).forEach(el => {
+        const { phase, freq, ampY, wobble, tilt } = getBlobPhysics(el);
+        const ω = freq * Math.PI * 2;
+
+        // Primary bounce — sine drives vertical position
+        const pos    = Math.sin(ω * t + phase);       // –1 = top, +1 = bottom
+        const y      = -pos * ampY;
+
+        // Squash/stretch derived from position (not velocity) — smooth & physical
+        // At top (pos=–1): taller + narrower.  At bottom (pos=+1): wider + shorter.
+        const scaleY = 1 - pos * 0.11;
+        const scaleX = 1 + pos * 0.09;
+
+        // Secondary fast wobble — simulates squishy material memory
+        const squeeze = Math.sin(ω * 2.3 * t + phase * 1.7) * wobble;
+
+        // Gentle tilt follows the arc
+        const rot = Math.sin(ω * 0.8 * t + phase + 0.5) * tilt;
+
+        el.style.transform =
+          `translateY(${y.toFixed(2)}px)` +
+          ` scaleX(${(scaleX + squeeze).toFixed(4)})` +
+          ` scaleY(${(scaleY - squeeze).toFixed(4)})` +
+          ` rotate(${rot.toFixed(2)}deg)`;
+      });
+    });
+
+    requestAnimationFrame(tick);
+  }
+
+  requestAnimationFrame(tick);
+})();

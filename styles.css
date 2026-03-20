@@ -65,7 +65,7 @@ html, body {
 .welcome-blob svg {
   width: 100%;
   height: 100%;
-  animation: bob 3.2s linear infinite;
+  animation: none;
   will-change: transform;
 }
 
@@ -317,52 +317,7 @@ html, body {
   filter: drop-shadow(0 8px 24px rgba(0,0,0,0.15));
 }
 
-@keyframes bob {
-  /* Resting — weight settled */
-  0% {
-    transform: translateY(0px) scaleX(1.04) scaleY(0.97) rotate(-0.5deg);
-    animation-timing-function: cubic-bezier(0.5, 0, 0.7, 0.3);
-  }
-  /* Anticipation — wind-up squash before launch */
-  10% {
-    transform: translateY(5px) scaleX(1.18) scaleY(0.82) rotate(-1.5deg);
-    animation-timing-function: cubic-bezier(0.15, 0, 0.1, 1);
-  }
-  /* Launch and rise — snappy */
-  40% {
-    transform: translateY(-28px) scaleX(0.88) scaleY(1.14) rotate(2deg);
-    animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
-  }
-  /* Peak — brief float */
-  50% {
-    transform: translateY(-30px) scaleX(0.90) scaleY(1.12) rotate(2.5deg);
-    animation-timing-function: cubic-bezier(0.35, 0, 0.55, 1);
-  }
-  /* Falling back */
-  63% {
-    transform: translateY(-4px) scaleX(0.97) scaleY(1.02) rotate(0.5deg);
-    animation-timing-function: cubic-bezier(0.2, 0, 0.3, 1);
-  }
-  /* Landing squash — squishy and wide */
-  72% {
-    transform: translateY(4px) scaleX(1.22) scaleY(0.80) rotate(-1deg);
-    animation-timing-function: cubic-bezier(0, 0, 0.06, 1); /* very slow recovery */
-  }
-  /* Oozing back — material memory */
-  84% {
-    transform: translateY(1px) scaleX(1.11) scaleY(0.91) rotate(-0.6deg);
-    animation-timing-function: cubic-bezier(0, 0, 0.18, 1);
-  }
-  /* Almost settled */
-  94% {
-    transform: translateY(0px) scaleX(1.05) scaleY(0.96) rotate(-0.4deg);
-    animation-timing-function: ease-out;
-  }
-  /* Seamless rest */
-  100% {
-    transform: translateY(0px) scaleX(1.04) scaleY(0.97) rotate(-0.5deg);
-  }
-}
+/* @keyframes bob removed — animation driven by JS requestAnimationFrame */
 
 @keyframes blink {
   0%, 92%, 100% { transform: scaleY(1); }
@@ -370,7 +325,7 @@ html, body {
 }
 
 .bobbing svg {
-  animation: bob 3.2s linear infinite;
+  animation: none;
 }
 
 .result-identity {
@@ -620,7 +575,7 @@ html, body {
   width: 160px;
   height: 160px;
   margin: 4px 0 16px;
-  animation: bob 3.2s linear infinite;
+  animation: none;
 }
 
 .postcard-character svg {
@@ -1002,20 +957,13 @@ kbd {
 }
 
 .group-member svg {
-  animation: bob 3.2s linear infinite;
+  animation: none;
   width: 86px;
   height: 86px;
   display: block;
 }
 
-/* Stagger delays so they don't all bounce in sync */
-.group-member:nth-child(2) svg  { animation-delay: -0.55s; }
-.group-member:nth-child(3) svg  { animation-delay: -1.10s; }
-.group-member:nth-child(4) svg  { animation-delay: -0.30s; }
-.group-member:nth-child(5) svg  { animation-delay: -1.50s; }
-.group-member:nth-child(6) svg  { animation-delay: -0.80s; }
-.group-member:nth-child(7) svg  { animation-delay: -1.80s; }
-.group-member:nth-child(8) svg  { animation-delay: -0.45s; }
+/* Stagger handled by JS — each blob gets unique random phase */
 
 /* Stagger heights for team-photo feel */
 .group-member:nth-child(even)   { transform: translateY(-16px); }
