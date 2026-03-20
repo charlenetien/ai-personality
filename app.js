@@ -602,18 +602,24 @@ document.querySelectorAll('.how-to-tab').forEach(tab => {
   const c = p.get('c');
   const e = p.get('e');
   const a = p.get('a');
-  if (c !== null && e !== null && a !== null) {
-    const colorIndex = parseInt(c) % 20;
-    const expressionIndex = parseInt(e) % 5;
-    const accessoryIndex = parseInt(a) % 5;
-    const col = COLORS[colorIndex];
+  if (c === null || e === null || a === null) return;
 
-    resultCharacter.innerHTML = generateCharacterSVG(colorIndex, expressionIndex, accessoryIndex);
-    resultCharacter.classList.add('character-reveal');
-    colorTag.textContent = col.name;
-    colorTag.style.background = col.body;
-    resultFlavor.textContent = FLAVOR_LINES[colorIndex][expressionIndex];
-    claudeOutput.textContent = '← Take the quiz to generate your personal setting.';
-    showScreen('screen-result');
-  }
+  const colorIndex      = parseInt(c) % 20;
+  const expressionIndex = parseInt(e) % 5;
+  const accessoryIndex  = parseInt(a) % 5;
+  const col = COLORS[colorIndex];
+
+  // Populate shared card
+  document.getElementById('shared-character').innerHTML =
+    generateCharacterSVG(colorIndex, expressionIndex, accessoryIndex);
+  document.getElementById('shared-name').textContent    = col.name;
+  document.getElementById('shared-flavor').textContent  = FLAVOR_LINES[colorIndex][expressionIndex];
+
+  // Set card + background gradient
+  const grad = `linear-gradient(145deg, ${col.highlight} 0%, ${col.body} 45%, ${col.shadow} 100%)`;
+  document.getElementById('shared-card').style.background = grad;
+  document.getElementById('shared-bg').style.background   =
+    `linear-gradient(160deg, ${col.highlight}55 0%, ${col.body}33 50%, ${col.shadow}22 100%)`;
+
+  showScreen('screen-shared');
 })();
