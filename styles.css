@@ -452,6 +452,10 @@ html, body {
   padding: 24px;
 }
 
+.postcard-overlay[hidden] {
+  display: none;
+}
+
 .postcard-backdrop {
   position: absolute;
   inset: 0;
