@@ -58,13 +58,15 @@ html, body {
 .welcome-blob {
   width: 140px;
   height: 140px;
+  /* Shadow on wrapper — stays still while SVG squashes, no repaint jank */
+  filter: drop-shadow(0 14px 28px rgba(139, 92, 246, 0.28));
 }
 
 .welcome-blob svg {
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 12px 32px rgba(139, 92, 246, 0.3));
   animation: bob 3.8s linear infinite;
+  will-change: transform;
 }
 
 /* welcome-bob removed — uses shared bob keyframes */
@@ -316,39 +318,39 @@ html, body {
 }
 
 @keyframes bob {
-  /* Resting — slightly squashed from own weight */
+  /* Resting — slightly wide, weight settled */
   0% {
-    transform: translateY(0px) scaleX(1.05) scaleY(0.96) rotate(-0.4deg);
-    animation-timing-function: cubic-bezier(0.22, 0, 0.5, 1); /* slow start, accelerate up */
+    transform: translateY(0px) scaleX(1.04) scaleY(0.97) rotate(-0.3deg);
+    animation-timing-function: cubic-bezier(0.45, 0.05, 0.55, 0.95);
   }
-  /* Slow rise — body elongates gently */
-  40% {
-    transform: translateY(-20px) scaleX(0.94) scaleY(1.08) rotate(0.8deg);
-    animation-timing-function: cubic-bezier(0.5, 0, 1, 0.6); /* peak, then gravity takes over */
+  /* Slow smooth rise */
+  38% {
+    transform: translateY(-16px) scaleX(0.96) scaleY(1.05) rotate(0.5deg);
+    animation-timing-function: cubic-bezier(0.45, 0.05, 0.55, 0.95);
   }
-  /* Peak — brief, heavy things don't linger */
-  50% {
-    transform: translateY(-22px) scaleX(0.95) scaleY(1.07) rotate(1deg);
-    animation-timing-function: cubic-bezier(0.8, 0, 1, 1); /* fast fall */
+  /* Peak — lingers briefly */
+  48% {
+    transform: translateY(-17px) scaleX(0.96) scaleY(1.05) rotate(0.6deg);
+    animation-timing-function: cubic-bezier(0.3, 0, 0.5, 1);
   }
-  /* Impact — big squishy squash */
-  65% {
-    transform: translateY(4px) scaleX(1.26) scaleY(0.75) rotate(-0.4deg);
-    animation-timing-function: cubic-bezier(0, 0, 0.1, 1); /* slow juicy recovery */
+  /* Soft landing — weight settles in */
+  62% {
+    transform: translateY(2px) scaleX(1.14) scaleY(0.87) rotate(-0.3deg);
+    animation-timing-function: cubic-bezier(0, 0, 0.08, 1); /* very slow recovery start */
   }
-  /* Oozing back — material slowly pushes back */
-  80% {
-    transform: translateY(2px) scaleX(1.12) scaleY(0.91) rotate(-0.2deg);
-    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  /* Oozing back — still quite squashed */
+  74% {
+    transform: translateY(1px) scaleX(1.09) scaleY(0.92) rotate(-0.25deg);
+    animation-timing-function: cubic-bezier(0, 0, 0.15, 1);
   }
-  /* Almost settled */
-  93% {
-    transform: translateY(0px) scaleX(1.06) scaleY(0.96) rotate(-0.3deg);
-    animation-timing-function: ease-out;
+  /* Still recovering — material memory */
+  86% {
+    transform: translateY(0px) scaleX(1.06) scaleY(0.95) rotate(-0.2deg);
+    animation-timing-function: cubic-bezier(0, 0, 0.3, 1);
   }
-  /* Back to resting squash — seamless loop */
+  /* Settling back to resting squash */
   100% {
-    transform: translateY(0px) scaleX(1.05) scaleY(0.96) rotate(-0.4deg);
+    transform: translateY(0px) scaleX(1.04) scaleY(0.97) rotate(-0.3deg);
   }
 }
 
