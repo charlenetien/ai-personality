@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meet Your AI Self</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ── Welcome Screen ─────────────────────────────────────── -->
+  <div id="screen-welcome" class="screen active">
+    <div class="welcome-content">
+      <div class="welcome-character-wrap">
+        <div id="welcome-blob" class="welcome-blob"></div>
+      </div>
+      <h1 class="welcome-title">Meet your AI self.</h1>
+      <p class="welcome-desc">5 questions. A character that's yours.<br>A ready-to-use Claude global setting.</p>
+      <button class="btn-primary" id="start-btn">Let's go →</button>
+    </div>
+  </div>
+
+  <!-- ── Quiz Screen ────────────────────────────────────────── -->
+  <div id="screen-quiz" class="screen">
+    <div class="quiz-shell">
+      <div class="quiz-header">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <span class="progress-label" id="progress-label">1 of 5</span>
+      </div>
+
+      <div class="quiz-body">
+        <!-- Questions injected here -->
+        <div id="question-area"></div>
+
+        <!-- Free-form step (step 6) -->
+        <div id="freeform-area" hidden>
+          <h2 class="question-text">Anything else Claude should know about you?</h2>
+          <p class="freeform-hint">Optional — but this goes directly into your global setting.</p>
+          <div class="freeform-prompts">
+            <span class="freeform-chip">What you're working on</span>
+            <span class="freeform-chip">Your role or field</span>
+            <span class="freeform-chip">Things that annoy you</span>
+            <span class="freeform-chip">How you like to think through problems</span>
+          </div>
+          <textarea id="freeform-input" class="freeform-textarea" placeholder="e.g. I'm a product designer at a fintech company. I get annoyed when Claude explains things I didn't ask to understand. I like to start broad and narrow down."></textarea>
+          <button class="btn-primary" id="freeform-next">Reveal my AI self →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Result Screen ──────────────────────────────────────── -->
+  <div id="screen-result" class="screen">
+    <div class="result-shell">
+
+      <div class="result-top">
+        <div class="result-character-wrap">
+          <div id="result-character" class="result-character bobbing"></div>
+        </div>
+        <div class="result-identity">
+          <div class="color-tag" id="color-tag"></div>
+          <p class="result-flavor" id="result-flavor"></p>
+        </div>
+      </div>
+
+      <div class="result-claude-section">
+        <div class="claude-section-header">
+          <span class="claude-label">Your Claude global setting</span>
+          <button class="copy-btn" id="copy-claude-btn">Copy</button>
+        </div>
+        <pre class="claude-output" id="claude-output"></pre>
+      </div>
+
+      <div class="how-to-apply">
+        <p class="how-to-title">How to apply this setting</p>
+
+        <div class="how-to-tabs">
+          <button class="how-to-tab active" data-tab="terminal">Terminal</button>
+          <button class="how-to-tab" data-tab="claudecode">Claude Code Desktop</button>
+        </div>
+
+        <div class="how-to-panel" id="tab-terminal">
+          <ol class="how-to-steps">
+            <li><span class="step-num">1</span> Copy the text above</li>
+            <li><span class="step-num">2</span> Open Terminal and run: <code>open ~/.claude/</code></li>
+            <li><span class="step-num">3</span> Open or create <code>CLAUDE.md</code> and paste</li>
+            <li><span class="step-num">4</span> Save — every Claude Code session now knows this</li>
+          </ol>
+          <p class="how-to-alt">One-liner: <code>cat &gt; ~/.claude/CLAUDE.md</code> → paste → <kbd>Ctrl+D</kbd></p>
+        </div>
+
+        <div class="how-to-panel" id="tab-claudecode" hidden>
+          <ol class="how-to-steps">
+            <li><span class="step-num">1</span> Copy the text above</li>
+            <li><span class="step-num">2</span> Open Claude Code Desktop and start a new session</li>
+            <li><span class="step-num">3</span> Type: <code>/settings</code> — this opens your global settings file</li>
+            <li><span class="step-num">4</span> Paste the content into the <code>CLAUDE.md</code> tab and save</li>
+          </ol>
+          <p class="how-to-alt">Or just tell Claude: <code>"Update my global CLAUDE.md with this:"</code> and paste — it'll handle the file for you.</p>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn-ghost" id="share-btn">Share my character ↗</button>
+        <button class="btn-ghost" id="retake-btn">Retake</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Postcard Modal ───────────────────────────────────────── -->
+  <div id="postcard-modal" class="postcard-overlay" hidden>
+    <div class="postcard-backdrop"></div>
+    <div class="postcard-shell">
+      <div class="postcard-card" id="postcard-card">
+        <div class="postcard-deco deco-tl"></div>
+        <div class="postcard-deco deco-br"></div>
+        <div class="postcard-eyebrow">✦ my AI self</div>
+        <div class="postcard-character" id="postcard-character"></div>
+        <div class="postcard-info">
+          <p class="postcard-name" id="postcard-name"></p>
+          <p class="postcard-flavor" id="postcard-flavor"></p>
+        </div>
+        <p class="postcard-url">meet your AI self →</p>
+      </div>
+      <div class="postcard-actions">
+        <button class="btn-primary postcard-copy-btn" id="postcard-copy-btn">Copy link</button>
+        <button class="btn-ghost postcard-close-btn" id="postcard-close-btn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Share Toast ─────────────────────────────────────────── -->
+  <div class="toast" id="share-toast" hidden>Link copied to clipboard</div>
+
+  <script src="app.js"></script>
+</body>
+</html>
