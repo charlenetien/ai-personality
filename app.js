@@ -164,10 +164,10 @@ const BLOB_SHAPES = [
   'M60,20 C78,12 102,22 112,40 C124,60 120,82 110,100 C98,118 74,124 50,118 C24,112 4,94 2,70 C0,48 12,30 30,24 C42,18 48,26 60,20Z',
 ];
 
-function generateCharacterSVG(colorIndex, expressionIndex, accessoryIndex) {
+function generateCharacterSVG(colorIndex, expressionIndex, accessoryIndex, shapeIndex = 0) {
   const c = COLORS[colorIndex];
-  const id = `bg-${colorIndex}-${expressionIndex}-${accessoryIndex}`;
-  const blob = BLOB_SHAPES[colorIndex % BLOB_SHAPES.length];
+  const id = `bg-${colorIndex}-${expressionIndex}-${accessoryIndex}-${shapeIndex}`;
+  const blob = BLOB_SHAPES[shapeIndex % BLOB_SHAPES.length];
   return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <radialGradient id="${id}" cx="38%" cy="32%" r="62%">
@@ -307,10 +307,12 @@ function buildClaudeMD(answers, freeformText) {
 
 function getCharacter(answers) {
   const [a0, a1, a2, a3, a4] = answers;
-  const colorIndex      = (a0 * 3 + a4 * 7 + a2 * 11) % 20;
-  const expressionIndex = (a1 + a3 * 4) % 5;
-  const accessoryIndex  = (a2 * 2 + a4 + a0) % 5;  // 0=none 1=beret 2=glasses 3=crown 4=stars
-  return { colorIndex, expressionIndex, accessoryIndex };
+  // All 5 answers feed every dimension with different weights → much better spread
+  const colorIndex      = (a0 * 5 + a1 * 3 + a2 * 7 + a3 * 11 + a4 * 2) % 20;
+  const expressionIndex = (a0 * 3 + a1 * 7 + a2 * 2 + a3 * 5  + a4 * 11) % 5;
+  const accessoryIndex  = (a0 * 7 + a1 * 2 + a2 * 11 + a3 * 3 + a4 * 5) % 5;
+  const shapeIndex      = (a0 * 2 + a1 * 11 + a2 * 5 + a3 * 7  + a4 * 3) % 5;
+  return { colorIndex, expressionIndex, accessoryIndex, shapeIndex };
 }
 
 // Flavor lines indexed by [colorIndex][expressionIndex]
@@ -472,7 +474,7 @@ function burstSparkles(container, color) {
 // ── Show result ───────────────────────────────────────────
 
 function showResult() {
-  const { colorIndex, expressionIndex, accessoryIndex } = getCharacter(answers);
+  const { colorIndex, expressionIndex, accessoryIndex, shapeIndex } = getCharacter(answers);
   const c = COLORS[colorIndex];
   const freeformText = freeformInput.value.trim();
 
@@ -483,7 +485,7 @@ function showResult() {
   document.querySelector('.result-claude-section').classList.remove('reveal-card');
 
   // Set content
-  resultCharacter.innerHTML = generateCharacterSVG(colorIndex, expressionIndex, accessoryIndex);
+  resultCharacter.innerHTML = generateCharacterSVG(colorIndex, expressionIndex, accessoryIndex, shapeIndex);
   colorTag.textContent = c.name;
   colorTag.style.background = c.body;
   resultFlavor.textContent = FLAVOR_LINES[colorIndex][expressionIndex];
@@ -529,11 +531,11 @@ const postcardCopyBtn  = document.getElementById('postcard-copy-btn');
 const postcardCloseBtn = document.getElementById('postcard-close-btn');
 
 shareBtn.addEventListener('click', () => {
-  const { colorIndex, expressionIndex, accessoryIndex } = getCharacter(answers);
+  const { colorIndex, expressionIndex, accessoryIndex, shapeIndex } = getCharacter(answers);
   const c = COLORS[colorIndex];
 
   // Populate postcard
-  postcardCharEl.innerHTML = generateCharacterSVG(colorIndex, expressionIndex, accessoryIndex);
+  postcardCharEl.innerHTML = generateCharacterSVG(colorIndex, expressionIndex, accessoryIndex, shapeIndex);
   postcardNameEl.textContent = c.name;
   postcardFlavorEl.textContent = FLAVOR_LINES[colorIndex][expressionIndex];
 
@@ -557,8 +559,8 @@ document.addEventListener('keydown', (e) => {
 });
 
 postcardCopyBtn.addEventListener('click', () => {
-  const { colorIndex, expressionIndex, accessoryIndex } = getCharacter(answers);
-  const params = new URLSearchParams({ c: colorIndex, e: expressionIndex, a: accessoryIndex });
+  const { colorIndex, expressionIndex, accessoryIndex, shapeIndex } = getCharacter(answers);
+  const params = new URLSearchParams({ c: colorIndex, e: expressionIndex, a: accessoryIndex, s: shapeIndex });
   const url = `${location.origin}${location.pathname}?${params}`;
   navigator.clipboard.writeText(url).then(() => {
     postcardCopyBtn.textContent = 'Copied!';
@@ -607,11 +609,12 @@ document.querySelectorAll('.how-to-tab').forEach(tab => {
   const colorIndex      = parseInt(c) % 20;
   const expressionIndex = parseInt(e) % 5;
   const accessoryIndex  = parseInt(a) % 5;
+  const shapeIndex      = parseInt(p.get('s') || '0') % 5;
   const col = COLORS[colorIndex];
 
   // Populate shared card
   document.getElementById('shared-character').innerHTML =
-    generateCharacterSVG(colorIndex, expressionIndex, accessoryIndex);
+    generateCharacterSVG(colorIndex, expressionIndex, accessoryIndex, shapeIndex);
   document.getElementById('shared-name').textContent    = col.name;
   document.getElementById('shared-flavor').textContent  = FLAVOR_LINES[colorIndex][expressionIndex];
 
