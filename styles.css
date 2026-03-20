@@ -64,12 +64,17 @@ html, body {
   width: 100%;
   height: 100%;
   filter: drop-shadow(0 12px 32px rgba(139, 92, 246, 0.3));
-  animation: welcome-bob 3s ease-in-out infinite;
+  animation: welcome-bob 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 @keyframes welcome-bob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  0%   { transform: translateY(0px)   scaleX(1.00) scaleY(1.00); }
+  18%  { transform: translateY(-18px) scaleX(0.91) scaleY(1.10); }
+  36%  { transform: translateY(-24px) scaleX(0.88) scaleY(1.13); }
+  52%  { transform: translateY(3px)   scaleX(1.14) scaleY(0.87); }
+  65%  { transform: translateY(-10px) scaleX(0.94) scaleY(1.06); }
+  78%  { transform: translateY(1px)   scaleX(1.06) scaleY(0.95); }
+  100% { transform: translateY(0px)   scaleX(1.00) scaleY(1.00); }
 }
 
 .welcome-title {
@@ -319,8 +324,14 @@ html, body {
 }
 
 @keyframes bob {
-  0%, 100% { transform: translateY(0px) rotate(-1deg); }
-  50% { transform: translateY(-8px) rotate(1deg); }
+  0%   { transform: translateY(0px)   scaleX(1.00) scaleY(1.00) rotate(-1deg); }
+  18%  { transform: translateY(-20px) scaleX(0.90) scaleY(1.10) rotate(1.5deg); }
+  36%  { transform: translateY(-26px) scaleX(0.87) scaleY(1.14) rotate(2.5deg); }
+  52%  { transform: translateY(3px)   scaleX(1.16) scaleY(0.85) rotate(-1.5deg); }
+  63%  { transform: translateY(-11px) scaleX(0.93) scaleY(1.07) rotate(1deg); }
+  75%  { transform: translateY(1px)   scaleX(1.07) scaleY(0.94) rotate(-0.5deg); }
+  85%  { transform: translateY(-5px)  scaleX(0.97) scaleY(1.03) rotate(0.5deg); }
+  100% { transform: translateY(0px)   scaleX(1.00) scaleY(1.00) rotate(-1deg); }
 }
 
 @keyframes blink {
@@ -329,7 +340,7 @@ html, body {
 }
 
 .bobbing svg {
-  animation: bob 3.5s ease-in-out infinite;
+  animation: bob 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 .result-identity {
@@ -579,7 +590,7 @@ html, body {
   width: 160px;
   height: 160px;
   margin: 4px 0 16px;
-  animation: bob 3.5s ease-in-out infinite;
+  animation: bob 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 .postcard-character svg {
